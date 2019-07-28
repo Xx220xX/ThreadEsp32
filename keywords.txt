@@ -1,0 +1,24 @@
+###########################################
+# Syntax Coloring Map For Thread_ESP32-library
+###########################################
+
+###########################################
+# Datatypes (KEYWORD1)
+###########################################
+
+Thread	KEYWORD1
+ThreadEsp32 KEYWORD1
+###########################################
+# Methods and Functions (KEYWORD2)
+###########################################
+
+start	    KEYWORD2
+stop	    KEYWORD2
+sleep	    KEYWORD2
+isRuning	KEYWORD2
+getPriority	KEYWORD2
+pause	    KEYWORD2
+resume	    KEYWORD2
+getCurrent	KEYWORD2
+getName     KEYWORD2
+
