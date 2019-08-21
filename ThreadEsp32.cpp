@@ -9,15 +9,25 @@
 
 #include "ThreadEsp32.h"
 
-#define DEBUG_PRINT(x) 
+
+#ifndef THREAD_ESP32_DEBUG
+#error
+#define THREAD_DEBUG_PRINT(x)
+#define THREAD_DEBUG_PRINTLN(x)
+#else
+#define THREAD_DEBUG_PRINT(x) Serial.print(x);
+#define THREAD_DEBUG_PRINTLN(x) Serial.println(x);
+#endif
+
 int last_id = 0;
 
-Thread::Thread() {
+Thread::Thread( ) {
+	THREAD_DEBUG_PRINTLN("criando tarefa vazia agr")
     this->ready = false;
 }
 
-
-Thread::Thread(void (*function)(void *), const char *name, uint32_t stack_size, uint32_t priority, uint8_t nucleo) {
+Thread::Thread(const char *name,void (*function)(void *), uint32_t stack_size, uint32_t priority, uint8_t nucleo) {
+	THREAD_DEBUG_PRINTLN("criando tarefa agr")
     this->pFunction = function;
     this->stack_size = stack_size;
     this->nucleo = nucleo;
@@ -28,13 +38,14 @@ Thread::Thread(void (*function)(void *), const char *name, uint32_t stack_size, 
     snprintf(this->name, 14, "%s", name, last_id);
     snprintf(this->name,17,"%s %d",this->name,last_id);
     last_id++;
-    DEBUG_PRINT("Criado uma nova tarefa\n")
-    DEBUG_PRINT(this->name)
-    DEBUG_PRINT("\n")
+    
+   THREAD_DEBUG_PRINT("Criado uma nova tarefa: ")
+   THREAD_DEBUG_PRINTLN(this->name)
+
 }
 
 void Run(void *pThread) {
-    ((Thread *) pThread)->run();
+	((Thread *) pThread)->run();    	
 }
 
 bool Thread::start(void *params) {
@@ -67,17 +78,17 @@ bool Thread::start(void *params) {
 
 }
 
-bool Thread::stop() {
-    DEBUG_PRINT("tentativa de finalizar Tarefa: ")
+void Thread::stop() {
+   THREAD_DEBUG_PRINTLN("tentativa de finalizar Tarefa: ")
     if (this->started) {
-        vTaskDelete(this->handle);
-        this->stoped = true;
-        this->handle = NULL;
-        DEBUG_PRINT("SUCCESS\n")
-        return true;
+        	this->stoped = true;
+        	vTaskDelete(this->handle);
+        	this->handle= 0;      
+       		THREAD_DEBUG_PRINTLN("SUCCESS\n")
+        	return ;
     }
-    DEBUG_PRINT("FALHA\n")
-    return false;
+   THREAD_DEBUG_PRINTLN("FALHA\n")
+
 }
 
 void Thread::sleep(uint32_t ms) {
@@ -94,7 +105,7 @@ bool Thread::isRuning() {
 }
 
 Thread Thread::getCurrent() {
-    DEBUG_PRINT("Get Current Thread:\n")
+   THREAD_DEBUG_PRINTLN("Get Current Thread:")
     Thread currentThread;
     currentThread.ready = true;
     currentThread.started = true;
@@ -102,27 +113,27 @@ Thread Thread::getCurrent() {
     snprintf(currentThread.name, 16, "%s", pcTaskGetTaskName(NULL));
     currentThread.nucleo = xPortGetCoreID();
     currentThread.handle = xTaskGetCurrentTaskHandle();
-    DEBUG_PRINT("name: ")
-    DEBUG_PRINT(currentThread.name)
-    DEBUG_PRINT("\nPriority: ")
-    DEBUG_PRINT(currentThread.priority)
-    DEBUG_PRINT("\nnucleo: ")
-    DEBUG_PRINT(currentThread.nucleo)
-    DEBUG_PRINT("\n")
+   THREAD_DEBUG_PRINT("name: ")
+   THREAD_DEBUG_PRINTLN(currentThread.name)
+   THREAD_DEBUG_PRINT("Priority: ")
+   THREAD_DEBUG_PRINTLN(currentThread.priority)
+   THREAD_DEBUG_PRINT("nucleo: ")
+   THREAD_DEBUG_PRINTLN(currentThread.nucleo)
+    
     return currentThread;
 
 }
 
 void Thread::pause() {
-    DEBUG_PRINT(this->name)
-    DEBUG_PRINT(" solicitou uma pausa :")
+   THREAD_DEBUG_PRINT(this->name)
+   THREAD_DEBUG_PRINTLN(": solicitou uma pausa :")
     if (ready && started && !paused) {
         paused = true;
         vTaskSuspend(handle);
-        DEBUG_PRINT("Concedido\n")
+       THREAD_DEBUG_PRINTLN("Concedido\n")
         return;
     }
-    DEBUG_PRINT("negado\n")
+   THREAD_DEBUG_PRINTLN("negado\n")
 }
 
 void Thread::resume() {
@@ -134,9 +145,17 @@ void Thread::resume() {
 
 void Thread::run() {
     this->pFunction(this->params);
-    this->stop();
+    THREAD_DEBUG_PRINTLN("executou com sucesso agr vai parar :D")
+	this->stoped = true;
+	this->handle= NULL;
+    vTaskDelete(NULL);
+    
+    
 }
 
 const char *Thread::getName() {
     return this->name;
 }
+
+#undef THREAD_DEBUG_PRINT(x)
+#undef THREAD_DEBUG_PRINTLN(x)

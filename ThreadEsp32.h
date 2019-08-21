@@ -5,8 +5,9 @@
 #ifndef SMPLUG_THEADESP32_H
 #define SMPLUG_THEADESP32_H
 
+#define THREAD_ESP32_DEBUG
 
-#define THREAD_ESP32_VERSION 1
+#define THREAD_ESP32_VERSION 1.01
 
 #if ARDUINO >= 100
 #include "Arduino.h"
@@ -19,17 +20,18 @@
 #endif
 
 
+
 class Thread {
 protected:
 
 public:
     Thread();
 
-    Thread(void (*function)(void *), const char *name = NULL, uint32_t stack_size = 10000, uint32_t priority = 1,
+    Thread( const char *name,void (*function)(void *), uint32_t stack_size = 10000, uint32_t priority = 1,
            uint8_t nucleo = 0);
 
     bool start(void *params = NULL); // start thread, it can't alread started.
-    bool stop(); // stop and delete task, you'll can't start again.
+    void stop(); // stop and delete task, you'll can't start again.
     void sleep(uint32_t ms);
 
     bool isRuning(); // return if thread is current.
@@ -57,6 +59,7 @@ protected:
     bool stoped = false;
     TaskHandle_t handle = NULL;
 };
+
 
 
 #endif //SMPLUG_THEADESP32_H
