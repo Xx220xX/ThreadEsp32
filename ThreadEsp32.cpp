@@ -11,7 +11,6 @@
 
 
 #ifndef THREAD_ESP32_DEBUG
-#error
 #define THREAD_DEBUG_PRINT(x)
 #define THREAD_DEBUG_PRINTLN(x)
 #else
